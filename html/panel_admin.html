@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administrador - Tutorías</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="stylesheet" href="../css/admin_panel.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                    Panel Admin
+                </div>
+            </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-section="dashboard">
+                            <i class="fas fa-chart-pie"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="tutors">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            Gestión de Tutores
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="students">
+                            <i class="fas fa-user-graduate"></i>
+                            Gestión de Alumnos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="content">
+                            <i class="fas fa-book"></i>
+                            Gestión de Contenido
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-section="profile">
+                            <i class="fas fa-user-cog"></i>
+                            Mi Perfil
+                        </a>
+                    </li>
+                     <li class="nav-item">
+                        <a href="../php/logout.php" class="nav-link"> <i class="fas fa-sign-out-alt"></i>
+                            Cerrar Sesión
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="welcome-text">
+                    <h1 id="welcome-admin-name">Bienvenido, Administrador</h1>
+                    <p>Panel de control de la plataforma de tutorías</p>
+                </div>
+                <div class="user-actions">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-bell"></i>
+                        Notificaciones (<span id="notification-count">0</span>)
+                    </button>
+                    </div>
+            </header>
+
+            <section id="dashboard" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">
+                                <i class="fas fa-user-graduate"></i>
+                            </div>
+                        </div>
+                        <div class="stat-number" id="total-students">0</div>
+                        <div class="stat-label">Total de Alumnos</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                            </div>
+                        </div>
+                        <div class="stat-number" id="total-tutors">0</div>
+                        <div class="stat-label">Total de Tutores</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                        </div>
+                        <div class="stat-number" id="pending-tutors">0</div>
+                        <div class="stat-label">Tutores Pendientes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                             <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #60a5fa);">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                        </div>
+                        <div class="stat-number" id="approved-tutors">0</div>
+                        <div class="stat-label">Tutores Aprobados</div>
+                    </div>
+                </div>
+
+               <div class="stats-grid">
+                    </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+                    <div class="chart-container" style="position: relative; height:50vh; width:100%; max-width:800px; margin: auto;">
+                        <h3 style="margin-bottom: 1rem; color: #1f2937; text-align: center;">Estado de Tutores</h3>
+                        <canvas id="tutorStatusChart"></canvas>
+                    </div>
+                    <div class="chart-container" style="position: relative; height:50vh; width:100%; max-width:800px; margin: auto;">
+                        <h3 style="margin-bottom: 2rem; color: #1f2937; text-align: center;">Registros Mensuales (Últimos 6 Meses)</h3>
+                        <canvas id="registrationChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="tutors" class="content-section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Gestión de Tutores</h2>
+                        <div class="search-filters">
+                            <input type="text" id="tutor-search" class="search-input" placeholder="Buscar tutores...">
+                            <select id="status-filter" class="filter-select">
+                                <option value="">Todos los estados</option>
+                                <option value="pendiente">Pendientes</option>
+                                <option value="aprobado">Aprobados</option>
+                                <option value="rechazado">Rechazados</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="tutors-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Correo</th>
+                                    <th>Áreas</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="tutors-pagination">
+                        </div>
+                </div>
+            </section>
+
+            <section id="students" class="content-section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Gestión de Alumnos</h2>
+                        <div class="search-filters">
+                            <input type="text" id="student-search" class="search-input" placeholder="Buscar alumnos...">
+                            <select id="career-filter" class="filter-select">
+                                <option value="">Todas las carreras</option>
+                                <option value="ISC">ISC</option>
+                                <option value="IIA">IIA</option>
+                                <option value="LCD">LCD</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="students-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Boleta</th>
+                                    <th>Carrera</th>
+                                    <th>Correo</th>
+                                    <th>Fecha Registro</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="students-pagination">
+                        </div>
+                </div>
+            </section>
+
+            <section id="content" class="content-section">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>Gestión de Categorías</h2>
+                        <button class="btn btn-primary" onclick="openCategoryModal()">
+                            <i class="fas fa-plus"></i>
+                            Nueva Categoría
+                        </button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table" id="categories-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre</th>
+                                    <th>Descripción</th>
+                                    <th>Fecha Creación</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                </tbody>
+                        </table>
+                    </div>
+                     <div class="pagination" id="categories-pagination">
+                        </div>
+                </div>
+            </section>
+
+            <section id="profile" class="content-section">
+                <div class="table-container">
+                    <h2>Mi Perfil de Administrador</h2>
+                    <form id="profile-form" style="max-width: 600px; margin-top: 2rem;">
+                        <div class="form-group">
+                            <label class="form-label" for="profile-name">Nombre Completo</label>
+                            <input type="text" class="form-input" id="profile-name" name="nombre_completo" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="profile-username">Nombre de Usuario</label>
+                            <input type="text" class="form-input" id="profile-username" name="nombre_usuario" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="profile-email">Correo Electrónico</label>
+                            <input type="email" class="form-input" id="profile-email" name="correo" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="profile-password">Nueva Contraseña (opcional)</label>
+                            <input type="password" class="form-input" id="profile-password" name="nueva_contrasena">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="profile-password-confirm">Confirmar Nueva Contraseña</label>
+                            <input type="password" class="form-input" id="profile-password-confirm">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Guardar Cambios
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="tutor-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalle del Tutor</h2>
+                <span class="close" onclick="closeTutorModal()">&times;</span>
+            </div>
+            <div id="tutor-detail-content">
+                </div>
+        </div>
+    </div>
+
+    <div id="student-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detalle del Alumno</h2>
+                <span class="close" onclick="closeStudentModal()">&times;</span>
+            </div>
+            <div id="student-detail-content">
+                </div>
+        </div>
+    </div>
+    
+    <div id="edit-student-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Alumno</h2>
+                <span class="close" onclick="closeEditStudentModal()">&times;</span>
+            </div>
+            <form id="edit-student-form">
+                <input type="hidden" id="edit-student-id" name="student_id">
+                <div class="form-group">
+                    <label class="form-label" for="edit-student-name">Nombre Completo</label>
+                    <input type="text" class="form-input" id="edit-student-name" name="nombre_completo" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-student-username">Nombre de Usuario</label>
+                    <input type="text" class="form-input" id="edit-student-username" name="nombre_usuario" required>
+                </div>
+                 <div class="form-group">
+                    <label class="form-label" for="edit-student-boleta">Boleta</label>
+                    <input type="text" class="form-input" id="edit-student-boleta" name="boleta" required pattern="\d{10}" title="La boleta debe tener 10 dígitos">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-student-career">Carrera</label>
+                    <select class="form-select" id="edit-student-career" name="carrera" required>
+                        <option value="ISC">ISC - Ing. en Sistemas Computacionales</option>
+                        <option value="IIA">IIA - Ing. en Inteligencia Artificial</option>
+                        <option value="LCD">LCD - Lic. en Ciencia de Datos</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-student-phone">Número Celular</label>
+                    <input type="tel" class="form-input" id="edit-student-phone" name="numero_celular" required pattern="\d{10}" title="El número debe tener 10 dígitos">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-student-email">Correo Electrónico</label>
+                    <input type="email" class="form-input" id="edit-student-email" name="correo" required>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditStudentModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="category-modal-title">Nueva Categoría</h2>
+                <span class="close" onclick="closeCategoryModal()">&times;</span>
+            </div>
+            <form id="category-form">
+                <input type="hidden" id="category-id" name="id">
+                <div class="form-group">
+                    <label class="form-label" for="category-name">Nombre de la Categoría</label>
+                    <input type="text" class="form-input" id="category-name" name="nombre" required maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="category-description">Descripción (opcional)</label>
+                    <textarea class="form-textarea" id="category-description" name="descripcion"></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="category-submit-btn">Guardar Categoría</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="status-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="status-modal-title">Cambiar Estado</h2>
+                <span class="close" onclick="closeStatusModal()">&times;</span>
+            </div>
+            <form id="status-form">
+                <input type="hidden" id="tutor-id-status" name="tutor_id">
+                <input type="hidden" id="new-status-val" name="new_status"> <div id="rejection-reason-group" class="form-group" style="display: none;">
+                    <label class="form-label" for="rejection-reason">Motivo del Rechazo</label>
+                    <textarea class="form-textarea" id="rejection-reason" name="rejection_reason" placeholder="Ingresa el motivo del rechazo..."></textarea>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeStatusModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="confirm-status-btn">Confirmar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="../js/panel_admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Comunidad Web</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { max-width: 200px; height: auto; }
+        .form-container { max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        textarea { height: 80px; resize: vertical; }
+        .radio-group { display: flex; gap: 20px; margin-bottom: 15px; }
+        .radio-group input[type="radio"] { width: auto; margin-right: 5px; }
+        .hidden { display: none; }
+        button { background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary:hover { background-color: #545b62; }
+        .password-container { position: relative; }
+        .toggle-password { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; }
+        .message { padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .footer { text-align: center; margin-top: 40px; padding: 20px; border-top: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <img src="../assets/placeholder_logo.png" alt="Logo Comunidad Web" class="logo">
+        <h1>Comunidad Web - Registro</h1>
+    </header>
+
+    <div class="form-container">
+        <form id="registroForm" enctype="multipart/form-data">
+            <!-- Selector de tipo de usuario -->
+            <div class="form-group">
+                <label>Tipo de Usuario:</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="tipo_usuario" value="alumno" id="tipoAlumno"> Alumno</label>
+                    <label><input type="radio" name="tipo_usuario" value="tutor" id="tipoTutor"> Tutor</label>
+                </div>
+            </div>
+
+            <!-- Campos comunes -->
+            <div class="form-group">
+                <label for="nombre_completo">Nombre Completo *</label>
+                <input type="text" id="nombre_completo" name="nombre_completo" required>
+            </div>
+
+            <div class="form-group">
+                <label for="nombre_usuario">Nombre de Usuario *</label>
+                <input type="text" id="nombre_usuario" name="nombre_usuario" required>
+            </div>
+
+            <div class="form-group">
+                <label for="correo">Correo Electrónico *</label>
+                <input type="email" id="correo" name="correo" required>
+            </div>
+
+            <div class="form-group">
+                <label for="contrasena">Contraseña *</label>
+                <div class="password-container">
+                    <input type="password" id="contrasena" name="contrasena" required>
+                    <span class="toggle-password" onclick="togglePassword('contrasena')">👁</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmar_contrasena">Confirmar Contraseña *</label>
+                <div class="password-container">
+                    <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" required>
+                    <span class="toggle-password" onclick="togglePassword('confirmar_contrasena')">👁</span>
+                </div>
+            </div>
+
+            <!-- Campos específicos para Alumno -->
+            <div id="camposAlumno" class="hidden">
+                <div class="form-group">
+                    <label for="carrera">Carrera *</label>
+                    <select id="carrera" name="carrera">
+                        <option value="">Seleccione una carrera</option>
+                        <option value="ISC">Ingeniería en Sistemas Computacionales</option>
+                        <option value="IIA">Ingeniería en Inteligencia Artificial</option>
+                        <option value="LCD">Licenciatura en Ciencia de Datos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="boleta">Boleta (10 dígitos) *</label>
+                    <input type="text" id="boleta" name="boleta" maxlength="10" pattern="[0-9]{10}">
+                </div>
+
+                <div class="form-group">
+                    <label for="numero_celular_alumno">Número Celular (10 dígitos) *</label>
+                    <input type="text" id="numero_celular_alumno" name="numero_celular" maxlength="10" pattern="[0-9]{10}">
+                </div>
+
+                <div class="form-group">
+                    <label for="credencial_horario">Credencial u Horario (PDF) *</label>
+                    <input type="file" id="credencial_horario" name="credencial_horario" accept=".pdf">
+                </div>
+            </div>
+
+            <!-- Campos específicos para Tutor -->
+            <div id="camposTutor" class="hidden">
+                <div class="form-group">
+                    <label for="areas_materias">Áreas/Materias de Tutoría *</label>
+                    <textarea id="areas_materias" name="areas_materias" placeholder="Describe las áreas o materias en las que puedes brindar tutoría"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="nivel_experiencia">Nivel de Experiencia *</label>
+                    <select id="nivel_experiencia" name="nivel_experiencia">
+                        <option value="">Seleccione su nivel</option>
+                        <option value="Estudiante universitario">Estudiante universitario</option>
+                        <option value="Licenciado">Licenciado</option>
+                        <option value="Posgrado">Posgrado</option>
+                        <option value="Profesor">Profesor</option>
+                        <option value="Doctorado">Doctorado</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>¿Tiene certificación? *</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="tiene_certificacion" value="1" id="certSi"> Sí</label>
+                        <label><input type="radio" name="tiene_certificacion" value="0" id="certNo"> No</label>
+                    </div>
+                </div>
+
+                <div class="form-group hidden" id="grupoCertificacion">
+                    <label for="documentos_certificacion">Documentos de Certificación (PDF/DOC/DOCX) *</label>
+                    <input type="file" id="documentos_certificacion" name="documentos_certificacion" accept=".pdf,.doc,.docx">
+                </div>
+
+                <div class="form-group">
+                    <label for="explicacion_habilidades" id="labelHabilidades">Explicación de Habilidades *</label>
+                    <textarea id="explicacion_habilidades" name="explicacion_habilidades" placeholder="Describe tus habilidades y experiencia"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefono">Número de Teléfono (10 dígitos, opcional)</label>
+                    <input type="text" id="telefono" name="telefono" maxlength="10" pattern="[0-9]{10}">
+                </div>
+
+                <div class="form-group">
+                    <label for="horarios_disponibles">Horarios Disponibles *</label>
+                    <textarea id="horarios_disponibles" name="horarios_disponibles" placeholder="Ej: Lunes 10-12, Martes 14-16"></textarea>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit">Registrarse</button>
+                <button type="button" class="btn-secondary" onclick="window.location.href='index.html'">Ya tengo cuenta</button>
+            </div>
+        </form>
+
+        <div id="mensaje"></div>
+    </div>
+
+    <footer class="footer">
+        <p>Síguenos en: 
+            <a href="#">Facebook</a> | 
+            <a href="#">Twitter</a> | 
+            <a href="#">Instagram</a>
+        </p>
+        <p>&copy; 2024 Comunidad Web - Todos los derechos reservados</p>
+    </footer>
+
+    <script src="../js/registro.js"></script>
+</body>
+</html>

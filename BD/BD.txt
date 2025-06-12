@@ -1,0 +1,105 @@
+-- Script de creación de base de datos final para 'comunidad_web'
+
+CREATE DATABASE IF NOT EXISTS comunidad_web CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE comunidad_web;
+
+-- -----------------------------------------------------
+-- Tabla `alumnos`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS alumnos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre_completo VARCHAR(255) NOT NULL,
+  nombre_usuario VARCHAR(50) UNIQUE NOT NULL,
+  correo VARCHAR(255) UNIQUE NOT NULL,
+  carrera ENUM('ISC', 'IIA', 'LCD') NOT NULL,
+  semestre TINYINT UNSIGNED NOT NULL, -- NUEVO CAMPO
+  boleta VARCHAR(10) UNIQUE NOT NULL,
+  numero_celular VARCHAR(10) NOT NULL,
+  ruta_credencial_horario VARCHAR(500),
+  hash_contrasena VARCHAR(255) NOT NULL,
+  fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- -----------------------------------------------------
+-- Tabla `admins`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS admins (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre_completo VARCHAR(255) NOT NULL DEFAULT 'Administrador',
+  nombre_usuario VARCHAR(50) UNIQUE NOT NULL,
+  correo VARCHAR(255) UNIQUE NOT NULL,
+  hash_contrasena VARCHAR(255) NOT NULL,
+  fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- -----------------------------------------------------
+-- Tabla `tutores`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS tutores (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nombre_completo VARCHAR(255) NOT NULL,
+  nombre_usuario VARCHAR(50) UNIQUE NOT NULL,
+  correo VARCHAR(255) UNIQUE NOT NULL,
+  areas_materias TEXT,
+  nivel_experiencia ENUM('Estudiante universitario', 'Licenciado', 'Posgrado', 'Profesor', 'Doctorado') NOT NULL,
+  tiene_certificacion BOOLEAN NOT NULL,
+  ruta_documentos_certificacion VARCHAR(500),
+  explicacion_habilidades TEXT,
+  telefono VARCHAR(10),
+  horarios_disponibles TEXT,
+  hash_contrasena VARCHAR(255) NOT NULL,
+  tipo_tutoria ENUM('individual', 'grupal', 'ambas') NOT NULL DEFAULT 'individual',
+  max_tamano_grupo TINYINT UNSIGNED NULL DEFAULT NULL, -- NUEVO CAMPO
+  estado_registro ENUM('pendiente', 'aprobado', 'rechazado') NOT NULL DEFAULT 'pendiente',
+  motivo_rechazo TEXT NULL,
+  fecha_aprobacion TIMESTAMP NULL,
+  admin_aprobador INT NULL,
+  fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (admin_aprobador) REFERENCES admins(id) ON DELETE SET NULL
+);
+
+-- -----------------------------------------------------
+-- Tabla `citas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS citas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  alumno_id INT NOT NULL,
+  tutor_id INT NOT NULL,
+  fecha_hora DATETIME NOT NULL,
+  tipo_solicitado ENUM('individual', 'grupal') NOT NULL,
+  tamano_grupo INT NULL DEFAULT NULL,
+  materia_tema VARCHAR(255),
+  notas_alumno TEXT,
+  estado ENUM('pendiente', 'confirmada', 'rechazada', 'completada', 'cancelada_alumno', 'cancelada_tutor') NOT NULL DEFAULT 'pendiente',
+  fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (alumno_id) REFERENCES alumnos(id) ON DELETE CASCADE,
+  FOREIGN KEY (tutor_id) REFERENCES tutores(id) ON DELETE CASCADE
+);
+
+-- -----------------------------------------------------
+-- Tabla `quejas`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS quejas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  remitente_id INT NOT NULL,
+  remitente_tipo ENUM('alumno', 'tutor') NOT NULL,
+  destinatario_id INT NOT NULL,
+  destinatario_tipo ENUM('alumno', 'tutor') NOT NULL,
+  cita_id INT NULL,
+  asunto VARCHAR(255) NOT NULL,
+  descripcion TEXT NOT NULL,
+  estado ENUM('nueva', 'en_revision', 'resuelta') NOT NULL DEFAULT 'nueva',
+  fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (cita_id) REFERENCES citas(id) ON DELETE SET NULL
+);
+
+-- -----------------------------------------------------
+-- Inserción de usuarios administradores (Contraseña para todos: AdminPass123!)
+-- -----------------------------------------------------
+INSERT INTO admins (nombre_completo, nombre_usuario, correo, hash_contrasena) VALUES
+('Jareth Admin', 'jareth_admin', 'jareth@admin.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
+('Ale Admin', 'ale_admin', 'ale@admin.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
+('Adri Admin', 'adri_admin', 'adri@admin.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
+('Paulo Admin', 'paulo_admin', 'paulo@admin.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'),
+('Xander Admin', 'xander_admin', 'xander@admin.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
