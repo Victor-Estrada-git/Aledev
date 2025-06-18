@@ -59,8 +59,28 @@
             <div class="card">
                  <div class="card-header"><h3>Buscar Tutores</h3></div>
                  <form id="form-buscar-tutor" class="search-form">
-                    <input type="text" id="search-materia" name="materia" class="form-input" placeholder="Buscar por materia (ej. Cálculo, Java)...">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                    <div class="form-group">
+                        <label for="search-materia" class="form-label">Materia:</label>
+                        <input type="text" id="search-materia" name="materia" class="form-input" placeholder="Buscar por materia (ej. Cálculo, Java)...">
+                    </div>
+                    <div class="form-group">
+                        <label for="search-semestre" class="form-label">Semestre:</label>
+                        <select id="search-semestre" name="semestre" class="form-input">
+                            <option value="">Todos los semestres</option>
+                            <option value="1">1er Semestre</option>
+                            <option value="2">2do Semestre</option>
+                            <option value="3">3er Semestre</option>
+                            <option value="4">4to Semestre</option>
+                            <option value="5">5to Semestre</option>
+                            <option value="6">6to Semestre</option>
+                            <option value="7">7mo Semestre</option>
+                            <option value="8">8vo Semestre</option>
+                            </select>
+                    </div>
+                    <div class="form-group search-buttons">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Buscar</button>
+                        <button type="button" id="btn-clear-search" class="btn btn-secondary" style="margin-left: 10px;"><i class="fas fa-redo"></i> Limpiar Filtros</button>
+                    </div>
                  </form>
                  <div id="tutor-results-container" class="tutor-results">
                     <p class="placeholder-text">Realiza una búsqueda para encontrar tutores disponibles.</p>

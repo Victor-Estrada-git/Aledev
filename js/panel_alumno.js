@@ -9,12 +9,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Referencias a los elementos del formulario de búsqueda de tutores
+    const formBuscarTutor = document.getElementById('form-buscar-tutor');
+    const searchMateriaInput = document.getElementById('search-materia');
+    const searchSemestreSelect = document.getElementById('search-semestre');
+    const btnClearSearch = document.getElementById('btn-clear-search');
+
     document.getElementById('form-perfil')?.addEventListener('submit', actualizarPerfil);
-    document.getElementById('form-buscar-tutor')?.addEventListener('submit', buscarTutores);
+    
+    // Modificado: El evento submit ahora llama a buscarTutores sin parámetros directos,
+    // ya que los valores se obtendrán dentro de la función.
+    formBuscarTutor?.addEventListener('submit', (event) => {
+        event.preventDefault(); // Prevenir el envío del formulario
+        const materia = searchMateriaInput.value.trim();
+        const semestre = searchSemestreSelect.value;
+        buscarTutores(materia, semestre);
+    });
+
+    // Nuevo: Evento para el botón de limpiar filtros
+    btnClearSearch?.addEventListener('click', () => {
+        searchMateriaInput.value = ''; // Limpiar campo de materia
+        searchSemestreSelect.value = ''; // Resetear select a "Todos los semestres"
+        buscarTutores('', ''); // Realizar una búsqueda sin filtros (mostrar todos)
+    });
+
     document.getElementById('form-queja')?.addEventListener('submit', enviarQueja);
     document.getElementById('form-agendar-cita')?.addEventListener('submit', agendarCita);
     
-    document.querySelector('#agendarCitaModal .close-button').addEventListener('click', () => {
+    document.querySelector('#agendarCitaModal .close-button')?.addEventListener('click', () => {
         document.getElementById('agendarCitaModal').style.display = 'none';
     });
 
@@ -30,6 +52,10 @@ function showSection(sectionId) {
 
     switch (sectionId) {
         case 'profile': cargarDatosIniciales(); break;
+        case 'search': 
+            // Cargar tutores al entrar a la sección de búsqueda (sin filtros iniciales)
+            buscarTutores('', ''); 
+            break; 
         case 'appointments': cargarCitas(); break;
         case 'wallet': cargarBilletera(); break;
         case 'complaints': 
@@ -59,7 +85,7 @@ async function cargarDatosIniciales() {
     if (!data) return;
     const { perfil, estadisticas } = data;
     const carreras = { 'ISC': 'Ingeniería en Sistemas Computacionales', 'IIA': 'Ingeniería en Inteligencia Artificial', 'LCD': 'Licenciatura en Ciencia de Datos' };
-    const semestres = { 1: "1er", 2: "2do", 3: "3er", 4: "4to", 5: "5to", 6: "6to", 7: "7mo", 8: "8vo", 9: "9no" };
+    const semestres = { 1: "1er", 2: "2do", 3: "3er", 4: "4to", 5: "5to", 6: "6to", 7: "7mo", 8: "8vo", 9: "9no", 10: "10mo" }; // Añadido 10mo semestre
     document.getElementById('user-header-name').textContent = perfil.nombre_completo;
     document.getElementById('user-header-details').textContent = `${perfil.carrera} • ${semestres[perfil.semestre] || perfil.semestre} Semestre`;
     document.getElementById('profile-nombre').value = perfil.nombre_completo;
@@ -146,25 +172,42 @@ async function cargarQuejas() {
     }
 }
 
-async function buscarTutores(event) {
-    event.preventDefault();
-    const materia = document.getElementById('search-materia').value;
+// Modificado: Ahora buscarTutores recibe parámetros materia y semestre
+async function buscarTutores(materia = '', semestre = '') {
     const container = document.getElementById('tutor-results-container');
     container.innerHTML = '<p class="placeholder-text">Buscando...</p>';
 
-    const tutores = await fetchData(`?accion=buscar_tutores&materia=${encodeURIComponent(materia)}`);
+    // Construir la URL con los parámetros de búsqueda
+    // Solo añadir el parámetro si tiene un valor (no vacío)
+    let queryParams = [];
+    if (materia) {
+        queryParams.push(`materia=${encodeURIComponent(materia)}`);
+    }
+    if (semestre) { // El valor "" para 'Todos los semestres' no se enviará
+        queryParams.push(`semestre=${encodeURIComponent(semestre)}`);
+    }
+
+    const queryString = queryParams.length > 0 ? `&${queryParams.join('&')}` : '';
+    console.log(`Buscando con materia: "${materia}", semestre: "${semestre}"`); // Para depuración
+
+    const tutores = await fetchData(`?accion=buscar_tutores${queryString}`);
     
     container.innerHTML = '';
     if (tutores && tutores.length > 0) {
         tutores.forEach(tutor => {
+            // Asegurarse de que el avatar se muestre correctamente, si tutor.nombre_completo está vacío, usar un valor predeterminado
+            const initials = tutor.nombre_completo ? tutor.nombre_completo.match(/\b(\w)/g)?.join('').slice(0,2) : '??';
+            // Mostrar el semestre del tutor si está disponible
+            const tutorSemestre = tutor.semestre_imparte ? `<p>Semestre: ${tutor.semestre_imparte}</p>` : '';
+
             container.innerHTML += `
                 <div class="tutor-card">
                     <div class="tutor-header">
-                        <div class="tutor-avatar">${tutor.nombre_completo.match(/\b(\w)/g).join('').slice(0,2)}</div>
+                        <div class="tutor-avatar">${initials}</div>
                         <div class="tutor-info">
                             <h4>${tutor.nombre_completo}</h4>
                             <p>${tutor.nivel_experiencia}</p>
-                            <div class="tags">${tutor.areas_materias.split(',').map(m => `<span class="tag">${m.trim()}</span>`).join('')}</div>
+                            ${tutorSemestre} <div class="tags">${tutor.areas_materias.split(',').map(m => `<span class="tag">${m.trim()}</span>`).join('')}</div>
                         </div>
                         <div class="tutor-rate">
                             <div class="donation">Donativo Sugerido</div>
@@ -200,7 +243,9 @@ async function cargarDatosFormularioQueja() {
 async function actualizarPerfil(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const response = await fetchData('?accion=update_perfil', { method: 'POST', body: formData });
+    // Cambiando la acción para que sea específica para actualizar perfil
+    formData.append('accion', 'update_perfil'); 
+    const response = await fetchData('', { method: 'POST', body: formData }); // Envío a panel_alumno.php sin query param
     alert(response ? 'Perfil actualizado' : 'Error al actualizar');
     if (response) cargarDatosIniciales();
 }
@@ -216,6 +261,7 @@ async function agendarCita(event) {
     event.preventDefault();
     const form = event.target;
     const formData = new FormData(form);
+    formData.append('accion', 'agendar_cita'); // Asegúrate de que la acción sea correcta para tu backend
     
     const response = await fetch('../php/panel_alumno.php', { method: 'POST', body: formData });
     const result = await response.json();
@@ -224,7 +270,8 @@ async function agendarCita(event) {
     if (result.success) {
         form.reset();
         document.getElementById('agendarCitaModal').style.display = 'none';
-        document.querySelector('.nav-tab[data-section="appointments"]').click();
+        // Recargar citas para ver la nueva solicitud
+        document.querySelector('.nav-tab[data-section="appointments"]').click(); 
     }
 }
 
@@ -232,6 +279,7 @@ async function enviarQueja(event) {
     event.preventDefault();
     const form = event.target;
     const formData = new FormData(form);
+    formData.append('accion', 'enviar_queja'); // Asegúrate de que la acción sea correcta para tu backend
     
     const response = await fetch('../php/panel_alumno.php', { method: 'POST', body: formData });
     const result = await response.json();

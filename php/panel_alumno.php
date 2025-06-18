@@ -35,7 +35,11 @@ try {
             $stmt_perfil->execute([$alumno_id]);
             $perfil = $stmt_perfil->fetch(PDO::FETCH_ASSOC);
 
-            $stmt_stats = $conexion->prepare("SELECT (SELECT COUNT(*) FROM citas WHERE alumno_id = ? AND estado = 'completada') as horas_tutoria, (SELECT COUNT(DISTINCT materia_tema) FROM citas WHERE alumno_id = ? AND estado = 'completada') as materias_estudiadas, (SELECT AVG(calificacion) FROM calificaciones WHERE alumno_id = ?) as calificacion_promedio, (SELECT COUNT(DISTINCT tutor_id) FROM citas WHERE alumno_id = ?) as tutores_diferentes");
+            $stmt_stats = $conexion->prepare("SELECT 
+                (SELECT COUNT(*) FROM citas WHERE alumno_id = ? AND estado = 'completada') as horas_tutoria, 
+                (SELECT COUNT(DISTINCT materia_tema) FROM citas WHERE alumno_id = ? AND estado = 'completada') as materias_estudiadas, 
+                (SELECT AVG(calificacion) FROM calificaciones WHERE alumno_id = ?) as calificacion_promedio, 
+                (SELECT COUNT(DISTINCT tutor_id) FROM citas WHERE alumno_id = ?) as tutores_diferentes");
             $stmt_stats->execute([$alumno_id, $alumno_id, $alumno_id, $alumno_id]);
             $estadisticas = $stmt_stats->fetch(PDO::FETCH_ASSOC);
             
@@ -55,7 +59,12 @@ try {
             break;
 
         case 'get_billetera':
-             $conexion->prepare("INSERT IGNORE INTO billeteras (alumno_id, saldo) VALUES (?, 0.00)")->execute([$alumno_id]);
+             // Usar 'OR DIE' en entornos de desarrollo para depuración, pero mejor manejo de errores en producción
+             $insert_ignore_stmt = $conexion->prepare("INSERT IGNORE INTO billeteras (alumno_id, saldo) VALUES (?, 0.00)");
+             if (!$insert_ignore_stmt->execute([$alumno_id])) {
+                 error_log("Error al insertar en billeteras: " . implode(" ", $insert_ignore_stmt->errorInfo()));
+                 // Considera un mejor manejo de errores para el usuario si esto falla
+             }
             $stmt_saldo = $conexion->prepare("SELECT saldo FROM billeteras WHERE alumno_id = ?");
             $stmt_saldo->execute([$alumno_id]);
             $saldo = $stmt_saldo->fetchColumn();
@@ -74,16 +83,31 @@ try {
 
         case 'buscar_tutores':
             $materia = trim($_GET['materia'] ?? '');
-            $params = [];
-            $sql = "SELECT id, nombre_completo, nivel_experiencia, areas_materias, donativo_sugerido_hr, tipo_tutoria, max_tamano_grupo FROM tutores WHERE estado_registro = 'aprobado'";
+            $semestre = trim($_GET['semestre'] ?? ''); // <--- Nuevo: Obtener el parámetro de semestre
             
+            $params = [];
+            $sql = "SELECT id, nombre_completo, nivel_experiencia, areas_materias, donativo_sugerido_hr, tipo_tutoria, max_tamano_grupo, semestre_imparte 
+                    FROM tutores 
+                    WHERE estado_registro = 'aprobado'"; // Asegúrate de que esta columna y valor existan en tu tabla tutores
+
             if (!empty($materia)) {
                 $sql .= " AND areas_materias LIKE ?";
                 $params[] = "%" . $materia . "%";
             }
             
+            // <--- Nuevo: Añadir condición para semestre
+            if (!empty($semestre)) {
+                $sql .= " AND semestre_imparte = ?";
+                $params[] = $semestre;
+            }
+            
+            // Preparar la consulta
             $stmt = $conexion->prepare($sql);
+            
+            // Ejecutar la consulta con los parámetros
+            // PDO::prepare automáticamente maneja la vinculación de tipos si usas un array en execute()
             $stmt->execute($params);
+            
             $tutores = $stmt->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode(['success' => true, 'data' => $tutores]);
             break;
