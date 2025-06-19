@@ -32,45 +32,69 @@ body {
     padding: 20px;
 }
 
+/* --- ESTILOS DEL ENCABEZADO MODIFICADOS --- */
 .header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding: 20px 30px;
-    background: var(--card);
-    border-radius: 20px;
+    justify-content: space-between; /* CLAVE: Empuja los extremos a los lados */
+    align-items: center; /* Centra verticalmente */
+    padding: 10px 20px; /* Padding reducido para el aspecto deseado */
+    background: var(--card); /* Color de fondo del encabezado */
+    border-radius: 15px; /* Bordes redondeados */
     box-shadow: var(--shadow);
     backdrop-filter: blur(20px);
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px; /* Pequeño margen debajo del encabezado */
 }
 
-.logo {
-    font-size: 1.8rem;
-    font-weight: bold;
+.brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espacio entre el logo y el texto */
+}
+
+.brand-logo .logo-img {
+    height: 40px; /* Tamaño del logo */
+    width: 40px; /* Tamaño del logo */
+    border-radius: 50%; /* Lo hace circular */
+    border: 2px solid rgba(0, 0, 0, 0.1); /* Borde sutil del logo */
+    object-fit: contain; /* Ajusta la imagen dentro del círculo */
+}
+
+.brand-logo h1 {
+    margin: 0;
+    font-size: 1.6rem; /* Tamaño de fuente del texto "UNIMENTOR" */
+    font-weight: 700;
     background: var(--primary);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    color: transparent; /* Fallback */
 }
 
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+/* --- NUEVOS ESTILOS PARA LA SECCIÓN DE CERRAR SESIÓN --- */
+.logout-section {
+    display: flex; /* Para alinear el texto/detalles y el botón/icono */
+    align-items: center; /* Centra verticalmente */
+    gap: 15px; /* Espacio entre el texto y el icono/botón */
 }
 
-.avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-weight: bold;
-    font-size: 1.2rem;
+.logout-text-details {
+    text-align: right; /* Alinea el texto "Cerrar sesión" y "..." a la derecha */
 }
+
+.logout-button {
+    font-size: 1.5rem; /* Tamaño del icono de cerrar sesión */
+    color: var(--primary); /* Color del icono, usando tu variable principal */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.logout-button:hover {
+    color: var(--secondary); /* Color al pasar el ratón */
+}
+
+/* --- RESTO DE TU CSS ORIGINAL (sin cambios) --- */
 
 .nav-tabs {
     display: flex;
@@ -401,22 +425,30 @@ body {
     }
 
     .header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
+        flex-direction: row; /* Mantener en fila en móvil si solo es un elemento */
+        justify-content: space-between; /* Mantener la alineación a los extremos */
+        padding: 15px;
     }
 
-    .nav-tabs {
-        justify-content: center;
+    .brand-logo {
+        flex-direction: row; /* Mantener en fila en móvil */
+        align-items: center; /* Centrar elementos verticalmente */
+        justify-content: flex-start; /* Asegurar que el logo y texto estén a la izquierda */
     }
 
-    .cards-grid {
-        grid-template-columns: 1fr;
+    .brand-logo h1 {
+        font-size: 1.5rem;
     }
 
-    .modal-content {
-        width: 95%;
-        padding: 20px;
+    .logout-section {
+        flex-direction: row; /* Mantener en fila */
+        align-items: center; /* Centrar elementos verticalmente */
+        justify-content: flex-end; /* Asegurar que el texto y botón estén a la derecha */
+        gap: 10px; /* Ajustar el espacio en móvil si es necesario */
+    }
+
+    .logout-text-details {
+        text-align: right;
     }
 }
 
@@ -443,4 +475,7 @@ body {
 .floating-action:hover {
     transform: scale(1.1);
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+.icon-recommendations { 
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); /* Un gradiente cálido */
 }

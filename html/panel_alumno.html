@@ -8,25 +8,33 @@
     <link rel="stylesheet" href="../css/alumno_panel.css"> 
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo"><i class="fas fa-graduation-cap"></i> EduConnect</div>
-            <div class="user-profile">
-                <div class="avatar-placeholder"></div>
-                <div>
-                    <div id="user-header-name" style="font-weight: 600;">Cerrar sesión</div>
-                    <div id="user-header-details" style="color: var(--text-light); font-size: 0.9rem;">...</div>
-                </div>
-                <a href="../php/logout.php" title="Cerrar Sesión" class="logout-button"><i class="fas fa-sign-out-alt"></i></a>
-            </div>
+   
+    <div class="header">
+        
+        <div class="brand-logo">
+            <img src="../assets/logo.png" alt="Logo EduConnect" class="logo-img" />
+            <h1>UNIMENTOR</h1> 
         </div>
 
+        <div class="logout-section">
+            <div class="logout-text-details">
+                <div id="user-header-name" style="font-weight: 600;">Cerrar sesión</div>
+                <div id="user-header-details" style="color: var(--text-light); font-size: 0.9rem;"></div>
+            </div>
+            <a href="../php/logout.php" title="Cerrar Sesión" class="logout-button"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+        
+    </div>
+
+<div class="container">
         <div class="nav-tabs">
             <button class="nav-tab active" data-section="profile"><i class="fas fa-user"></i> Mi Perfil</button>
             <button class="nav-tab" data-section="search"><i class="fas fa-search"></i> Buscar Tutores</button>
             <button class="nav-tab" data-section="appointments"><i class="fas fa-calendar"></i> Mis Tutorías</button>
             <button class="nav-tab" data-section="wallet"><i class="fas fa-wallet"></i> Billetera</button>
             <button class="nav-tab" data-section="complaints"><i class="fas fa-exclamation-triangle"></i> Quejas</button>
+             <button class="nav-tab" data-section="recommendations"><i class="fas fa-lightbulb"></i> Recomendaciones</button> 
+
         </div>
 
         <div id="profile" class="content-section">
@@ -131,6 +139,20 @@
                 </div>
             </div>
         </div>
+       <div id="complaints" class="content-section" style="display: none;">
+    </div>
+
+<div id="recommendations" class="content-section" style="display: none;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon icon-recommendations"><i class="fas fa-lightbulb"></i></div>
+            <h3>Tutores Recomendados para Ti</h3>
+        </div>
+        <div id="recommended-tutors-container" class="tutor-results">
+            <p class="placeholder-text">Cargando recomendaciones...</p>
+        </div>
+    </div>
+</div> 
     </div>
 
     <div id="agendarCitaModal" class="modal">

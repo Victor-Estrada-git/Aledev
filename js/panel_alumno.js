@@ -40,8 +40,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('agendarCitaModal').style.display = 'none';
     });
 
-    // Carga inicial
-    showSection('profile');
+    // Carga inicial (asegúrate de que esta sea la sección activa por defecto al cargar)
+    showSection('profile'); 
 });
 
 function showSection(sectionId) {
@@ -50,17 +50,27 @@ function showSection(sectionId) {
     });
     document.getElementById(sectionId).style.display = 'block';
 
+    // Lógica para cargar datos específicos de cada sección
     switch (sectionId) {
-        case 'profile': cargarDatosIniciales(); break;
+        case 'profile': 
+            cargarDatosIniciales(); 
+            break;
         case 'search': 
             // Cargar tutores al entrar a la sección de búsqueda (sin filtros iniciales)
             buscarTutores('', ''); 
             break; 
-        case 'appointments': cargarCitas(); break;
-        case 'wallet': cargarBilletera(); break;
+        case 'appointments': 
+            cargarCitas(); 
+            break;
+        case 'wallet': 
+            cargarBilletera(); 
+            break;
         case 'complaints': 
             cargarQuejas();
             cargarDatosFormularioQueja();
+            break;
+        case 'recommendations': // ¡NUEVO CASO PARA RECOMENDACIONES!
+            loadRecommendedTutors();
             break;
     }
 }
@@ -68,20 +78,28 @@ function showSection(sectionId) {
 // Función Fetch Genérica
 async function fetchData(endpoint, options = {}) {
     try {
-        const response = await fetch(`../php/panel_alumno.php${endpoint}`, options);
+        // Asumiendo que todos los endpoints PHP están en ../php/
+        const response = await fetch(`../php/${endpoint}`, options); 
         const result = await response.json();
-        if (!response.ok || !result.success) throw new Error(result.message || `Error HTTP: ${response.status}`);
-        return result.data;
+        if (!response.ok || (result.success !== undefined && !result.success)) {
+            // Manejo de errores más robusto, incluyendo cuando 'success' es explícitamente false
+            throw new Error(result.message || `Error HTTP: ${response.status} en ${endpoint}`);
+        }
+        return result.data; // Devuelve solo la propiedad 'data' si existe
     } catch (error) {
         console.error('Error en fetchData:', error);
-        alert(`Error: ${error.message}`);
-        return null;
+        // Evitar alert en algunos errores para una mejor UX, pero mostrarlo en otros
+        // if (!error.message.includes('No autorizado') && !error.message.includes('No hay')) {
+        //     alert(`Error: ${error.message}`);
+        // }
+        return null; // Retorna null en caso de error
     }
 }
 
-// Funciones de Carga y Renderizado
+
+// Funciones de Carga y Renderizado existentes...
 async function cargarDatosIniciales() {
-    const data = await fetchData('?accion=get_datos_iniciales');
+    const data = await fetchData('panel_alumno.php?accion=get_datos_iniciales');
     if (!data) return;
     const { perfil, estadisticas } = data;
     const carreras = { 'ISC': 'Ingeniería en Sistemas Computacionales', 'IIA': 'Ingeniería en Inteligencia Artificial', 'LCD': 'Licenciatura en Ciencia de Datos' };
@@ -101,7 +119,7 @@ async function cargarDatosIniciales() {
 }
 
 async function cargarCitas() {
-    const citas = await fetchData('?accion=get_citas');
+    const citas = await fetchData('panel_alumno.php?accion=get_citas');
     if (!citas) return;
     const pendientesContainer = document.getElementById('citas-pendientes-container');
     const proximasContainer = document.getElementById('citas-proximas-container');
@@ -142,7 +160,7 @@ async function cargarCitas() {
 }
 
 async function cargarBilletera() {
-    const data = await fetchData('?accion=get_billetera');
+    const data = await fetchData('panel_alumno.php?accion=get_billetera');
     if (!data) return;
     document.getElementById('saldo-billetera').textContent = `$${data.saldo}`;
     const container = document.getElementById('transacciones-container');
@@ -159,7 +177,7 @@ async function cargarBilletera() {
 }
 
 async function cargarQuejas() {
-    const quejas = await fetchData('?accion=get_quejas');
+    const quejas = await fetchData('panel_alumno.php?accion=get_quejas');
     if (!quejas) return;
     const container = document.getElementById('quejas-container');
     container.innerHTML = '';
@@ -190,7 +208,7 @@ async function buscarTutores(materia = '', semestre = '') {
     const queryString = queryParams.length > 0 ? `&${queryParams.join('&')}` : '';
     console.log(`Buscando con materia: "${materia}", semestre: "${semestre}"`); // Para depuración
 
-    const tutores = await fetchData(`?accion=buscar_tutores${queryString}`);
+    const tutores = await fetchData(`panel_alumno.php?accion=buscar_tutores${queryString}`);
     
     container.innerHTML = '';
     if (tutores && tutores.length > 0) {
@@ -226,7 +244,7 @@ async function buscarTutores(materia = '', semestre = '') {
 }
 
 async function cargarDatosFormularioQueja() {
-    const data = await fetchData(`?accion=get_datos_queja`);
+    const data = await fetchData(`panel_alumno.php?accion=get_datos_queja`);
     if (!data) return;
     const tutorSelect = document.getElementById('queja-tutor');
     const citaSelect = document.getElementById('queja-cita');
@@ -245,7 +263,8 @@ async function actualizarPerfil(event) {
     const formData = new FormData(event.target);
     // Cambiando la acción para que sea específica para actualizar perfil
     formData.append('accion', 'update_perfil'); 
-    const response = await fetchData('', { method: 'POST', body: formData }); // Envío a panel_alumno.php sin query param
+    // Asegúrate de que la URL para fetchData sea correcta para tu panel_alumno.php
+    const response = await fetchData('panel_alumno.php', { method: 'POST', body: formData }); 
     alert(response ? 'Perfil actualizado' : 'Error al actualizar');
     if (response) cargarDatosIniciales();
 }
@@ -288,5 +307,65 @@ async function enviarQueja(event) {
     if (result.success) {
         form.reset();
         cargarQuejas();
+    }
+}
+
+
+// --- NUEVA FUNCIÓN PARA CARGAR TUTORES RECOMENDADOS ---
+async function loadRecommendedTutors() {
+    const recommendationsContainer = document.getElementById('recommended-tutors-container');
+    recommendationsContainer.innerHTML = '<p class="placeholder-text">Cargando recomendaciones...</p>'; // Mensaje de carga
+
+    try {
+        // Llama al nuevo script PHP específico para recomendaciones
+        // Asegúrate de que este archivo exista en ../php/get_recommended_tutors.php
+        const tutors = await fetchData('get_recommended_tutors.php'); 
+
+        if (!tutors || tutors.length === 0) {
+            recommendationsContainer.innerHTML = '<p class="placeholder-text">No hay tutores recomendados por el momento.</p>';
+            return;
+        }
+
+        // Limpiar el contenedor antes de añadir nuevos tutores
+        recommendationsContainer.innerHTML = ''; 
+
+        // Iterar sobre los tutores y crear sus tarjetas
+        tutors.forEach(tutor => {
+            const tutorCard = document.createElement('div');
+            tutorCard.classList.add('tutor-card'); // Reutiliza la clase de tarjeta de tutor
+
+            // Asegurarse de que el avatar se muestre correctamente
+            const initials = (tutor.nombre && tutor.apellido) ? `${tutor.nombre.charAt(0)}${tutor.apellido.charAt(0)}` : '??';
+            // Formatear calificación si existe
+            const calificacionHTML = tutor.calificacion_promedio ? 
+                `<p>Calificación: <span style="font-weight: bold; color: #ffc107;"><i class="fas fa-star"></i> ${parseFloat(tutor.calificacion_promedio).toFixed(1)}</span></p>` : 
+                `<p>Calificación: N/A</p>`;
+
+            tutorCard.innerHTML = `
+                <div class="tutor-header">
+                    <div class="tutor-avatar">${initials}</div>
+                    <div class="tutor-info">
+                        <h4>${tutor.nombre} ${tutor.apellido}</h4>
+                        <p>${tutor.carrera || 'Carrera no especificada'}</p>
+                        <p>Especialidad: ${tutor.especialidad || 'No especificada'}</p>
+                        <p>Experiencia: ${tutor.experiencia || 'No especificada'}</p>
+                        ${calificacionHTML}
+                    </div>
+                </div>
+                <div class="tutor-actions">
+                    <button class="btn btn-primary btn-agendar" data-tutor-id="${tutor.id}" data-tutor-nombre="${tutor.nombre} ${tutor.apellido}"><i class="fas fa-calendar-plus"></i> Agendar Cita</button>
+                </div>
+            `;
+            recommendationsContainer.appendChild(tutorCard);
+        });
+
+        // Re-añadir el event listener para los botones "Agendar Cita" para los tutores recomendados
+        document.querySelectorAll('#recommended-tutors-container .btn-agendar').forEach(button => {
+            button.addEventListener('click', abrirModalAgendar);
+        });
+
+    } catch (error) {
+        console.error('Error al cargar tutores recomendados:', error);
+        recommendationsContainer.innerHTML = '<p class="placeholder-text error-message">No se pudieron cargar las recomendaciones. Intenta de nuevo más tarde.</p>';
     }
 }
