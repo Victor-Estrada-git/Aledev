@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recuperar Contraseña</title>
+    <link rel="stylesheet" href="../css/recuperar_contraseña_panel.css">
+</head>
+<body>
+    <header>
+        <div>
+            <img src="../assets/logo.png" alt="Logo Comunidad" width="50" height="50" style="vertical-align: middle;">
+            <span style="font-size: 24px; margin-left: 10px;">UNIMENTOR</span>
+        </div>
+        <hr>
+    </header>
+
+    <h1>Recuperar Contraseña</h1>
+    <p>Ingresa tu correo electrónico registrado. Si existe en nuestra base de datos, te enviaremos (simulado) instrucciones para restablecer tu contraseña.</p>
+    
+    <form id="recuperoForm">
+        <div>
+            <label for="correo_recupero">Correo Electrónico:</label><br>
+            <input type="email" id="correo_recupero" name="correo_recupero" required>
+        </div>
+        <br>
+        <button type="submit">Enviar Instrucciones</button>
+        <div id="mensajeRecupero" style="margin-top:10px;"></div>
+    </form>
+    <br>
+    <p style="color: aliceblue;"><a href="index.html">Volver a Iniciar Sesión</a></p>
+
+    <footer>
+        <hr>
+        <p>&copy; 2025 UNIMENTOR.</p>
+    </footer>
+
+    <script src="../js/procesar_recuperacion.js"> </script>
+</body>
+</html>
